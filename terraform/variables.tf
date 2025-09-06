@@ -7,5 +7,5 @@ variable "lambda_name" {
 variable "file_name" {
   description = "Nombre del archivo JAR de la Lambda"
   type        = string
-  default     = "send-notifications-lambda-1.0-SNAPSHOT.jar"
+  default     = "send-notification-lambda-1.0-SNAPSHOT.jar"
 }

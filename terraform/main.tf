@@ -58,7 +58,7 @@ data "aws_sqs_queue" "notification_sqs" {
 
 # Bucket para plantillas HTML
 resource "aws_s3_bucket" "templates_bucket" {
-  bucket = "notification-templates-bucket"
+  bucket = "notification-templates-bucket-inferno"
 }
 
 resource "aws_s3_bucket_versioning" "templates_versioning" {
@@ -71,20 +71,21 @@ resource "aws_s3_bucket_versioning" "templates_versioning" {
 # Lambda
 resource "aws_lambda_function" "send_notifications_lambda" {
   function_name = var.lambda_name
-  filename      = abspath("${path.module}/../send-notifications-lambda/target/${var.file_name}")
+  filename      = abspath("${path.module}/../send-notification-lambda/target/${var.file_name}")
   handler       = "org.example.SendNotificationsLambda::handleRequest"
   runtime       = "java17"
   timeout       = 20
   memory_size   = 512
   role          = aws_iam_role.iam_for_lambda.arn
 
-  source_code_hash = filebase64sha256(abspath("${path.module}/../send-notifications-lambda/target/${var.file_name}"))
+  source_code_hash = filebase64sha256(abspath("${path.module}/../send-notification-lambda/target/${var.file_name}"))
 
   environment {
     variables = {
       SQS_QUEUE_URL_NOTIFICATION = data.aws_sqs_queue.notification_sqs.url
       DLQ_URL                    = aws_sqs_queue.notification_dlq.url
       TEMPLATES_BUCKET           = aws_s3_bucket.templates_bucket.bucket
+      NOTIFICATIONS_TABLE        = aws_dynamodb_table.notification_table.name
     }
   }
 }
